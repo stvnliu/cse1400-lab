@@ -11,6 +11,3 @@ main:
 	popq	%rbp
 	movq	$0, %rdi
 	call	exit
-
-pow:
-	popq	
