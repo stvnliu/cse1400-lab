@@ -21,4 +21,13 @@ main:
 	popq	%rbp			# epilog complete
 	movq	$0, %rdi
 	call	exit
+factorial:
+	pushq	%rbp
+	movq	%rsp, %rbp
+
 	
+
+
+	movq	$rbp, %rsp
+	popq	%rbp
+	ret
