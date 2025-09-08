@@ -1,14 +1,11 @@
 # A COPY OF ASSIGNMENT 1. TO BE CHANGED
 .data
 message:    .asciz "Hi, We're Steven Liu (NetID: stevenliu) and Egor Yapparov (NetID: eyapparov). This is our submission for Assignment 1: Powers\n"
-question1:  .asciz "Enter base number: "
-question2:  .asciz "Enter power number: "
-answer:     .asciz "That would be: %lu\n"
-ph:         .asciz "%d"
-
-base:       .quad 0
-power:      .quad 0
-result:     .quad 0
+question:  .asciz "Factorial of: "
+dbg_process:  .asciz "Calculating factorial of: %d\n"
+answer:     .asciz "Final result: %d\n"
+entry:         .asciz "%d"
+fact_base:       .quad 0
 
 .text 
 
@@ -22,28 +19,18 @@ main:
     call    printf
 
 	#!FIRST NUMBER INPUT!
-	movq	$question1, %rdi	#moving our text into the first parameter register
+	movq	$question, %rdi	#moving our text into the first parameter register
 	call	printf
-    mov     $ph, %rdi           #moving the format of inputed data into rdi
-    mov     $base, %rsi         #moving the label where the program needs to store data into rsi
-    call    scanf
-
-    #!SECOND NUMBER INPUT!	
-	movq	$question2, %rdi	#moving our text into the first parameter register
-	call	printf
-    mov     $ph, %rdi			#moving the format of inputed data into rdi
-    mov     $power, %rsi		#moving the label where the program needs to store data into rsi
+    mov     $entry, %rdi           #moving the format of inputed data into rdi
+    mov     $fact_base, %rsi         #moving the label where the program needs to store data into rsi
     call    scanf
 
     #!FUNCTION CALL!	
-    movq	base, %rdi          #moving base into rdi for our function
-    movq    power, %rsi         #moving power into rsi for our function
-	call	power_func			#calling our function
-    movq    %rax, result		#moving our answer from rax into the label
-
+    movq	fact_base, %rdi 	#moving base into rdi for our function
+    call	factorial
     #!OUTPUT!
     mov $answer, %rdi			#moving our text into the first parameter register
-    mov result, %rsi			#moving result into the second parameter register
+    mov %rax, %rsi			#moving result into the second parameter register
     call printf
 
 	#!EPILOGE!
@@ -53,6 +40,36 @@ main:
 	#!EXITING THE PROGHRAM!
 	movq	$0, %rdi	        #moving 0 error code into the first parameter register
 	call	exit
+
+factorial:
+	pushq	%rbp
+	movq	%rsp, %rbp
+	subq	$16, %rsp
+	movq	%rdi, -8(%rbp)
+	
+	# DEBUG PRINT
+	movq	%rdi, %rsi
+	movq	$dbg_process, %rdi
+	call	printf
+	# Restoring %rdi value after print
+	movq	-8(%rbp), %rdi
+
+
+	cmpq	$0, -8(%rbp)
+	jne	fact_recurse
+fact_0:
+	movq	$1, %rax
+	jmp	end
+fact_recurse:
+	dec	%rdi
+	call	factorial
+	imul	-8(%rbp), %rax
+end:
+	addq	$16, %rsp
+	movq	%rbp, %rsp
+	popq	%rbp
+	ret
+
 
 
 	#!OUR FUNCTION!
