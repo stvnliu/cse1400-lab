@@ -1,3 +1,4 @@
+# A COPY OF ASSIGNMENT 1. TO BE CHANGED
 .data
 message:    .asciz "Hi, We're Steven Liu (NetID: stevenliu) and Egor Yapparov (NetID: eyapparov). This is our submission for Assignment 1: Powers\n"
 question1:  .asciz "Enter base number: "
