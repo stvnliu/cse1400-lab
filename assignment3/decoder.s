@@ -21,7 +21,7 @@
 charline: .asciz "%c"
 base_index:
 	.quad 0
-.include "final.s"
+.include "../data/final.s"
 
 
 ########
