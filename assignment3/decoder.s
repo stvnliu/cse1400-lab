@@ -1,14 +1,4 @@
 .text
-dbg_mask: .asciz "Masked: %.16x\n"
-dbg_addr: .asciz "using address %.16x\n"
-dbg_offset: .asciz "next offset: %d\n"
-dbg_orig: .asciz "whereas message start is %.16x\n"
-blockmask:
-	.quad 0x0000FFFFFFFF0000
-amountmask:
-	.quad 0x000000000000FF00
-charmask:
-	.quad 0x00000000000000FF
 charline: .asciz "%c"
 base_index:
 	.quad 0

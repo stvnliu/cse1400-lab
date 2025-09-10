@@ -1,13 +1,16 @@
 .text
-dbg_mask: .asciz "Masked: %x\n"
-dbg_addr: .asciz "using address %x\n"
-dbg_offset: .asciz "next offset: %d\n"
-dbg_orig: .asciz "whereas message start is %x\n"
+// dbg_mask: .asciz "Masked: %x\n"
+// dbg_addr: .asciz "using address %x\n"
+// dbg_offset: .asciz "next offset: %d\n"
+// dbg_orig: .asciz "whereas message start is %x\n"
 charline: 
-	.asciz "\033[38;5;%dm\033[48;5;%dm%c\033[0m"
+	.asciz "\033[38;5;%dm\033[48;5;%dm%c"
+effectline:
+	.asciz "\033[%dm%c"
 base_index:
 	.quad 0
-.include "helloWorld.s"
+
+.include "final.s"
 
 .global main
 
@@ -22,7 +25,52 @@ base_index:
 #   first: the address of the message to read                *
 #   return: no return value                                  *
 # ************************************************************
+effect:
+reset:
+	.quad 0
+	.quad 0
+blinkstop: 
+	.quad 37
+	.quad 25
+bold: 
+	.quad 42
+	.quad 1
+faint:
+	.quad 66
+	.quad 2
+conceal:
+	.quad 105
+	.quad 8
+reveal:
+	.quad 153
+	.quad 28
+blink:
+	.quad 182
+	.quad 5
 
+effect_match:
+	pushq	%rbp
+	movq	%rsp, %rbp
+	subq	$8, %rsp
+	movq	$6, %rax
+try_match_effect:
+	leaq	effect(, %rax, 8), %rsi
+	movq	(%rsi), %rsi
+	movq	%rsi, -8(%rbp)
+	cmpq	%rdi, -8(%rbp)	# match the effect code
+	je	to_ansi
+	decq	%rax
+	cmpq	$0, %rax
+	jne	try_match_effect
+to_ansi:
+	addq	$8, %rax
+	movq	effect(%rax), %rax
+	jmp	effect_match_end
+effect_match_end:
+	addq	$8, %rsp
+	movq	%rbp, %rsp
+	popq	%rbp
+	ret
 decode_line:
 	# prologue
 	pushq	%rbp 			# push the base pointer (and align the stack)
@@ -63,11 +111,25 @@ decode_line:
 	// call	printf
 
 putchar:
+	movq	-40(%rbp), %rax
+	cmpq	%rax, -32(%rbp)
+	jne	put_color
+put_effect:
+	movq	%rax, %rdi
+	call	effect_match
+
+	movq	$effectline, %rdi
+	movq	%rax, %rsi
+	movq	-24(%rbp), %rdx
+	call	printf
+	jmp	put_finish
+put_color:
 	movq	$charline, %rdi
 	movq	-40(%rbp), %rsi
 	movq	-32(%rbp), %rdx
 	movq	-24(%rbp), %rcx
 	call	printf
+put_finish:
 	decq	-16(%rbp)			# amount decrease by 1
 	cmpq	$0, -16(%rbp)
 	jne	putchar
