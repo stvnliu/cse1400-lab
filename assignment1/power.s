@@ -2,7 +2,7 @@
 message:    .asciz "Hi, We're Steven Liu (NetID: stevenliu) and Egor Yapparov (NetID: eyapparov). This is our submission for Assignment 1: Powers\n"
 question1:  .asciz "Enter base number: "
 question2:  .asciz "Enter power number: "
-answer:     .asciz "That would be: %lu\n"
+answer:     .asciz "%d\n"
 ph:         .asciz "%d"
 
 base:       .quad 0
@@ -37,7 +37,7 @@ main:
     #!FUNCTION CALL!	
     movq	base, %rdi          #moving base into rdi for our function
     movq    power, %rsi         #moving power into rsi for our function
-	call	power_func			#calling our function
+	call	pow			#calling our function
     movq    %rax, result		#moving our answer from rax into the label
 
     #!OUTPUT!
@@ -55,20 +55,20 @@ main:
 
 
 	#!OUR FUNCTION!
-power_func:
+pow:
     pushq   %rbp				#prolouge
     movq    %rsp, %rbp			#prolouge
-
     movq    %rdi, %rbx			#moving first argument(base) into rbx
     movq    $1, %rax			#moving 1 to rax, because it is anything to the power of 0
     movq    %rsi, %rcx			#moving second argument(power) into rcx
-
-power_mul:						#start of the loop
-    imul    %rbx, %rax			#multiplying rax(our result) by rbx(our base) and storing it in rax
-    dec     %rcx				#rcx--
+power_mul:				#rcx--
     cmp     $0, %rcx			#comparing rcx(power) to 0
-    jne     power_mul			#if previous comparison is true(rcx(power) > 0) -> jump to the start of the loop
-
+    je     power_end #if previous comparison is true(rcx(power) > 0) -> jump to the start of the loop
+    						#start of the loop
+    imul    %rbx, %rax			#multiplying rax(our result) by rbx(our base) and storing it in rax
+    dec     %rcx
+    jmp	    power_mul
+power_end:
     movq	%rbp, %rsp 			#epilouge
 	popq	%rbp				#epilouge
     ret							#epilouge
